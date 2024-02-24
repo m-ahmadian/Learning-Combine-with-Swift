@@ -51,3 +51,13 @@ Just(7)
         Just(2)
     }
     .sink { print($0) }
+
+
+Just(5)
+    .tryMap { _ in
+        throw APIError.unknownError
+    }
+    .catch { result in
+        Just(3)
+    }
+    .sink { print($0) }
