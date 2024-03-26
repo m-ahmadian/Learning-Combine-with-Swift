@@ -87,3 +87,36 @@ let anotherSubscription = anotherSubject
 
 // Publish the value `Subject`, via the subject directly
 anotherSubject.send("Subject")
+
+
+// MARK: - (7) Publish data once with Future and Just
+
+// A simple publisher using Just, to produce once to each subscriber before completion
+let _ = Just("A data stream")
+    .sink { value in
+        print("value is \(value)")
+    }
+
+// A simple use of Future, in a function
+enum FutureError: Error {
+    case notMultiple
+}
+
+let future = Future<String, FutureError> { promise in
+    let calendar = Calendar.current
+    let second = calendar.component(.second, from: Date())
+    print("second is \(second)")
+    if second.isMultiple(of: 3) {
+        promise(.success("We are successful: \(second)"))
+    } else {
+        promise(.failure(.notMultiple))
+    }
+}
+.catch { error in
+    Just("Caught the error")
+}
+.delay(for: .init(1), scheduler: RunLoop.main)
+.eraseToAnyPublisher()
+
+
+future.sink(receiveCompletion: { print($0) }, receiveValue: { print($0) })
